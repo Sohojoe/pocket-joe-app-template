@@ -68,31 +68,11 @@ app.add_middleware(
 # Mount MCP → /mcp
 app.mount("/mcp", mcp_app)
 
-# ───────────────────────────────────────────────────────────────
-# STATIC FILES (Frontend)
-# Serve built frontend from frontend/dist/
-# In production, Railway builds the frontend during deployment
-# ───────────────────────────────────────────────────────────────
-FRONTEND_DIST = Path(__file__).parent / "frontend" / "dist"
-
-if FRONTEND_DIST.exists():
-    # Serve static assets (JS, CSS, images)
-    app.mount("/assets", StaticFiles(directory=FRONTEND_DIST / "assets"), name="assets")
-
-    # Serve index.html for all other routes (SPA routing)
-    app.mount("/", StaticFiles(directory=FRONTEND_DIST, html=True), name="frontend")
-
 
 # ────────────────────────────────────────────────
-# FastAPI Endpoint: /api/hello
-# REST mirror of the MCP tool for direct HTTP access
+# FastAPI Endpoints
+# Define all routes BEFORE mounting static files
 # ────────────────────────────────────────────────
-@app.get("/api/hello")
-async def hello_api(text: str | None = Query(None)):
-    msgs = await hello_world_policy(text)
-    return msgs[0].payload
-
-
 @app.get("/health")
 async def health():
     return {"status": "ok"}
@@ -108,3 +88,24 @@ async def api_info():
             "health": "/health",
         },
     }
+
+
+@app.get("/api/hello")
+async def hello_api(text: str | None = Query(None)):
+    msgs = await hello_world_policy(text)
+    return msgs[0].payload
+
+
+# ───────────────────────────────────────────────────────────────
+# STATIC FILES (Frontend)
+# Serve built frontend from frontend/dist/
+# IMPORTANT: Must be mounted LAST so it doesn't override API routes
+# ───────────────────────────────────────────────────────────────
+FRONTEND_DIST = Path(__file__).parent / "frontend" / "dist"
+
+if FRONTEND_DIST.exists():
+    # Serve static assets (JS, CSS, images)
+    app.mount("/assets", StaticFiles(directory=FRONTEND_DIST / "assets"), name="assets")
+
+    # Serve index.html for all other routes (SPA routing)
+    app.mount("/", StaticFiles(directory=FRONTEND_DIST, html=True), name="frontend")
