@@ -73,7 +73,8 @@ app.mount("/mcp", mcp_app)
 # ────────────────────────────────────────────────
 @app.get("/api/hello")
 async def hello_api(text: str | None = Query(None)):
-    msgs = await hello_world_policy(text)
+    ctx = AppContext.get_ctx()
+    msgs = await ctx.hello(text=text)
     return msgs[0].payload
 
 
