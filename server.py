@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 """Pocket Joe App Template – MCP + FastAPI"""
 
+from pathlib import Path
+
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from fastmcp import FastMCP
 from pocket_joe import BaseContext, InMemoryRunner, Message, policy
 
@@ -55,8 +58,7 @@ app = FastAPI(title="Pocket Joe App Template", lifespan=mcp_app.lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:5173",           # local frontend (Vite dev)
-        "https://YOUR-VERCEL-APP.vercel.app",  # TODO: replace with your Vercel URL
+        "http://localhost:5173",  # local frontend (Vite dev)
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -66,6 +68,20 @@ app.add_middleware(
 # Mount MCP → /mcp
 app.mount("/mcp", mcp_app)
 
+# ───────────────────────────────────────────────────────────────
+# STATIC FILES (Frontend)
+# Serve built frontend from frontend/dist/
+# In production, Railway builds the frontend during deployment
+# ───────────────────────────────────────────────────────────────
+FRONTEND_DIST = Path(__file__).parent / "frontend" / "dist"
+
+if FRONTEND_DIST.exists():
+    # Serve static assets (JS, CSS, images)
+    app.mount("/assets", StaticFiles(directory=FRONTEND_DIST / "assets"), name="assets")
+
+    # Serve index.html for all other routes (SPA routing)
+    app.mount("/", StaticFiles(directory=FRONTEND_DIST, html=True), name="frontend")
+
 
 # ────────────────────────────────────────────────
 # FastAPI Endpoint: /api/hello
@@ -73,8 +89,7 @@ app.mount("/mcp", mcp_app)
 # ────────────────────────────────────────────────
 @app.get("/api/hello")
 async def hello_api(text: str | None = Query(None)):
-    ctx = AppContext.get_ctx()
-    msgs = await ctx.hello(text=text)
+    msgs = await hello_world_policy(text)
     return msgs[0].payload
 
 
@@ -83,10 +98,10 @@ async def health():
     return {"status": "ok"}
 
 
-@app.get("/")
-async def root():
+@app.get("/api")
+async def api_info():
     return {
-        "message": "Pocket Joe App Template",
+        "message": "Pocket Joe App Template API",
         "endpoints": {
             "api": "/api/hello?text=joe",
             "mcp": "/mcp",

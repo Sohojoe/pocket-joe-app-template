@@ -1,4 +1,7 @@
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
+// In production, API is served from same origin
+// In development, Vite dev server runs on :5173, API on :8000
+const API_BASE = import.meta.env.VITE_API_BASE_URL ??
+  (import.meta.env.DEV ? "http://localhost:8000" : "");
 
 export type HelloResponse = { greeting: string };
 
