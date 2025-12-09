@@ -2,11 +2,10 @@
 # Builds both Node.js frontend and Python backend
 
 [phases.setup]
-nixPkgs = ["nodejs_20", "python312"]
+nixPkgs = ["nodejs_20", "python312", "uv"]
 
 [phases.install]
 cmds = [
-    "pip install uv",
     "uv sync",
     "cd frontend && npm install"
 ]
