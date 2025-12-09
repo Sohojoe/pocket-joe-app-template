@@ -98,11 +98,18 @@ This template is configured for **single-deployment** to Railway. The build proc
    - Railway auto-detects the configuration via `nixpacks.toml`
    - Wait ~3-5 minutes for build (includes frontend build)
 
-3. **Access Your App**
-   - Railway provides a URL like `https://your-app.railway.app`
-   - Frontend: `https://your-app.railway.app/`
-   - API: `https://your-app.railway.app/api/hello`
-   - MCP: `https://your-app.railway.app/mcp`
+3. **Generate Public Domain**
+   - Click on your deployed service in the Railway dashboard
+   - Go to **Settings** tab
+   - Find **Networking** → **Public Networking** section
+   - Click **Generate Domain**
+   - Railway will generate a public URL (e.g., `https://your-app.up.railway.app`)
+
+4. **Access Your App**
+   - Use the generated Railway URL to access your app
+   - Frontend: `https://your-app.up.railway.app/`
+   - API: `https://your-app.up.railway.app/api/hello`
+   - MCP: `https://your-app.up.railway.app/mcp`
 
 ### How It Works
 
